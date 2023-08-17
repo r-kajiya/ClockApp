@@ -25,6 +25,11 @@ namespace ClockApp
             _stopwatchLapCellViewPrefab = stopwatchLapCellViewPrefab;
         }
 
+        public void SetActiveView(bool enable )
+        {
+            
+        }
+
         public void Start()
         {
             Presenter.RegisterActionOnClickLapButton(OnLap, _disposable);
@@ -50,7 +55,7 @@ namespace ClockApp
             }
         }
         
-        void IDisposable.Dispose()
+        public void Dispose()
         { 
             _disposable.Dispose();
         }

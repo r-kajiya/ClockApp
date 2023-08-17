@@ -38,7 +38,7 @@ namespace ClockApp
             }
         }
         
-        void IDisposable.Dispose()
+        public void Dispose()
         { 
             _disposable.Dispose();
         }
