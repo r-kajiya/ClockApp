@@ -7,16 +7,16 @@ using Object = UnityEngine.Object;
 
 namespace ClockApp
 {
-    public class StopwatchUseCase : UseCaseBase<StopwatchPresenter> ,ITickable, IStartable, IDisposable
+    public class StopwatchUseCase : UseCaseBase<StopwatchPresenter>, ITickable, IStartable, IDisposable
     {
         bool _isStart;
         bool _isStarted;
         float _timerCount;
         int _cellCount;
-        ReactiveProperty<float> _timerCounter;
+        TimeCountService _timerCounter;
         readonly CompositeDisposable _disposable = new();
         readonly StopwatchLapCellView _stopwatchLapCellViewPrefab;
-        
+
         const int CELL_COUNT_MAX = 100;
 
         [Inject]
@@ -25,25 +25,20 @@ namespace ClockApp
             _stopwatchLapCellViewPrefab = stopwatchLapCellViewPrefab;
         }
 
-        public void SetActiveView(bool enable )
-        {
-            
-        }
-
         public void Start()
         {
             Presenter.RegisterActionOnClickLapButton(OnLap, _disposable);
             Presenter.RegisterActionOnClickResetButton(OnReset, _disposable);
             Presenter.RegisterActionOnClickStartButton(OnStart, _disposable);
             Presenter.RegisterActionOnClickPauseButton(OnPause, _disposable);
-            
+
             Presenter.SetActiveStartButton(true);
             Presenter.SetActivePauseButton(false);
             Presenter.SetActiveLapButton(true);
             Presenter.SetActiveResetButton(false);
-            
-            _timerCounter = new ReactiveProperty<float>();
-            _timerCounter.Subscribe(OnChangedTimerCount).AddTo(_disposable);
+
+            _timerCounter = new();
+            _timerCounter.Subscribe(OnChangedTimerCount, _disposable);
             _isStarted = false;
         }
 
@@ -51,12 +46,13 @@ namespace ClockApp
         {
             if (_isStart)
             {
-                _timerCounter.Value += Time.deltaTime;
+                float dt = Time.deltaTime;
+                _timerCounter.TickTack(dt);
             }
         }
-        
+
         public void Dispose()
-        { 
+        {
             _disposable.Dispose();
         }
 
@@ -76,23 +72,12 @@ namespace ClockApp
             {
                 return;
             }
-            
+
             Presenter.SetActiveStartButton(false);
             Presenter.SetActivePauseButton(true);
             Presenter.SetActiveLapButton(true);
             Presenter.SetActiveResetButton(false);
-            
-            if (_cellCount < CELL_COUNT_MAX)
-            {
-                TimeSpan timeSpan =  BuildTimeCounterTimeSpan(_timerCounter.Value);
-                _cellCount++;
-                var cell = InstantiateLapCell(timeSpan, _cellCount);
-                var rectTransform = Presenter.LapCellParent as RectTransform;
-                if (rectTransform != null)
-                {
-                    rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, cell.CellHeight() * _cellCount);
-                }   
-            }
+            BuildLap();
         }
 
         void OnPause()
@@ -101,7 +86,7 @@ namespace ClockApp
             {
                 return;
             }
-            
+
             _isStart = false;
             Presenter.SetActiveStartButton(true);
             Presenter.SetActivePauseButton(false);
@@ -111,24 +96,36 @@ namespace ClockApp
 
         void OnReset()
         {
-            _timerCounter.Value = 0;
+            _isStarted = false;
+            _timerCounter.SetTimer(0.0f);
             Presenter.SetActiveStartButton(true);
             Presenter.SetActivePauseButton(false);
             Presenter.SetActiveLapButton(true);
             Presenter.SetActiveResetButton(false);
-            
-            _cellCount = 0;
-            for (int i = 0 ; i < Presenter.LapCellParent.childCount; i++)
+            DestroyAllCell();
+        }
+
+        void BuildLap()
+        {
+            if (_cellCount >= CELL_COUNT_MAX)
             {
-                Object.Destroy(Presenter.LapCellParent.GetChild(i).gameObject);
+                return;
             }
 
-            _isStarted = false;
+            _cellCount++;
+
+            TimeSpan timeSpan = _timerCounter.ConvertTimeSpan();
+            var cell = InstantiateLapCell(timeSpan, _cellCount);
+            var rectTransform = Presenter.LapCellParent as RectTransform;
+            if (rectTransform != null)
+            {
+                rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, cell.CellHeight() * _cellCount);
+            }
         }
 
         StopwatchLapCellUseCase InstantiateLapCell(TimeSpan timeSpan, int lapNumber)
         {
-            var stopwatchLapCellView = Object.Instantiate<StopwatchLapCellView>(_stopwatchLapCellViewPrefab, Presenter.LapCellParent);
+            var stopwatchLapCellView = Object.Instantiate(_stopwatchLapCellViewPrefab, Presenter.LapCellParent);
             var cellPresenter = new StopwatchLapCellPresenter(stopwatchLapCellView);
             var cellUseCase = new StopwatchLapCellUseCase(cellPresenter);
             cellUseCase.SetProgressTimer(timeSpan.Minutes, timeSpan.Seconds, timeSpan.Milliseconds);
@@ -136,23 +133,19 @@ namespace ClockApp
             return cellUseCase;
         }
 
-        void OnChangedTimerCount(float timerCounter)
+        void DestroyAllCell()
         {
-            TimeSpan timeSpan = BuildTimeCounterTimeSpan(timerCounter);
-            Presenter.SetProgressTimer(timeSpan.Minutes, timeSpan.Seconds, timeSpan.Milliseconds);     
+            _cellCount = 0;
+            for (int i = 0; i < Presenter.LapCellParent.childCount; i++)
+            {
+                Object.Destroy(Presenter.LapCellParent.GetChild(i).gameObject);
+            }
         }
 
-        TimeSpan BuildTimeCounterTimeSpan(float timerCounter)
+        void OnChangedTimerCount(float time)
         {
-            int timerCounterSecond = Mathf.CeilToInt(timerCounter);
-            float timerCounterMilliSecond = timerCounter - Mathf.FloorToInt(timerCounter);
-            TimeSpan timeSpan = new TimeSpan(0, 0, timerCounterSecond);
-            int minute = timeSpan.Minutes;
-            int second = timeSpan.Seconds;
-            const float floatingDigitCoefficient = 100.0f; // example. 0.11 * 100.0 = 11
-            int millisecond = Mathf.FloorToInt(timerCounterMilliSecond * floatingDigitCoefficient);
-            return new TimeSpan(0, 0, minute,second,  millisecond);
+            TimeSpan timeSpan = _timerCounter.ConvertTimeSpan();
+            Presenter.SetProgressTimer(timeSpan.Minutes, timeSpan.Seconds, timeSpan.Milliseconds);
         }
     }
 }
-
