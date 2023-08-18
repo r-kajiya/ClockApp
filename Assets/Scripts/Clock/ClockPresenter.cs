@@ -1,15 +1,24 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using VContainer;
 
 namespace ClockApp
 {
-    public class ClockPresenter : PresenterBase<ClockView>
+    public interface IClockPresenter<out TView> : IPresenter<TView>
+        where TView : IClockView
     {
+        void SetDateTime(DateTime dateTime);
+        void SetPlaceName(string placeName);
+    }
+
+    public class ClockPresenter : IClockPresenter<IClockView>
+    {
+        public IClockView View { get; }
+
         [Inject]
-        public ClockPresenter(ClockView view) : base(view) { }
+        public ClockPresenter(IClockView view)
+        {
+            View = view;
+        }
 
         public void SetDateTime(DateTime dateTime)
         {

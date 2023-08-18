@@ -7,8 +7,20 @@ using Object = UnityEngine.Object;
 
 namespace ClockApp
 {
-    public class StopwatchUseCase : UseCaseBase<StopwatchPresenter>, ITickable, IStartable, IDisposable
+    public interface IStopwatchUseCase<out TPresenter, out TView> : IUseCase<TPresenter, TView>
+        where TView : IStopwatchView
+        where TPresenter : IStopwatchPresenter<TView>
     {
+        void OnStart();
+        void OnLap();
+        void OnPause();
+        void OnReset();
+    }
+
+    public class StopwatchUseCase : IStopwatchUseCase<IStopwatchPresenter<IStopwatchView>, IStopwatchView>, ITickable, IStartable, IDisposable
+    {
+        public IStopwatchPresenter<IStopwatchView> Presenter { get; }
+
         bool _isStart;
         bool _isStarted;
         float _timerCount;
@@ -20,8 +32,9 @@ namespace ClockApp
         const int CELL_COUNT_MAX = 100;
 
         [Inject]
-        public StopwatchUseCase(StopwatchPresenter presenter, StopwatchLapCellView stopwatchLapCellViewPrefab) : base(presenter)
+        public StopwatchUseCase(IStopwatchPresenter<IStopwatchView> presenter, StopwatchLapCellView stopwatchLapCellViewPrefab)
         {
+            Presenter = presenter;
             _stopwatchLapCellViewPrefab = stopwatchLapCellViewPrefab;
         }
 
@@ -56,7 +69,7 @@ namespace ClockApp
             _disposable.Dispose();
         }
 
-        void OnStart()
+        public void OnStart()
         {
             _isStart = true;
             _isStarted = true;
@@ -66,7 +79,7 @@ namespace ClockApp
             Presenter.SetActiveResetButton(false);
         }
 
-        void OnLap()
+        public void OnLap()
         {
             if (_isStarted == false)
             {
@@ -80,7 +93,7 @@ namespace ClockApp
             BuildLap();
         }
 
-        void OnPause()
+        public void OnPause()
         {
             if (_isStarted == false)
             {
@@ -94,7 +107,7 @@ namespace ClockApp
             Presenter.SetActiveResetButton(true);
         }
 
-        void OnReset()
+        public void OnReset()
         {
             _isStarted = false;
             _timerCounter.SetTimer(0.0f);

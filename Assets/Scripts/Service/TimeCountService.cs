@@ -33,9 +33,9 @@ namespace ClockApp
             int minute = timeSpan.Minutes;
             int second = timeSpan.Seconds;
             // example. 0.11 * 100.0 = 11
-            const double floatingDigitCoefficient = 100.0f; 
+            const double floatingDigitCoefficient = 100.0f;
             int millisecond = Mathf.FloorToInt((float)(timerCounterMilliSecond * floatingDigitCoefficient));
-            return new TimeSpan(0, hour, minute,second,  millisecond);
+            return new TimeSpan(0, hour, minute, second, millisecond);
         }
     }
 }

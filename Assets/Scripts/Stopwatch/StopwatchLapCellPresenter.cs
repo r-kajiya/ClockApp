@@ -5,16 +5,29 @@ using VContainer;
 
 namespace ClockApp
 {
-    public class StopwatchLapCellPresenter : PresenterBase<StopwatchLapCellView>
+    public interface IStopwatchLapCellPresenter<out TView> : IPresenter<TView>
+        where TView : IStopwatchLapCellView
     {
+        void SetLapNumber(int number);
+        void SetProgressTimer(int minute, int second, int millisecond);
+        float CellHeight();
+    }
+
+    public class StopwatchLapCellPresenter : IStopwatchLapCellPresenter<IStopwatchLapCellView>
+    {
+        public IStopwatchLapCellView View { get; }
+
         [Inject]
-        public StopwatchLapCellPresenter(StopwatchLapCellView view) : base(view) { }
+        public StopwatchLapCellPresenter(IStopwatchLapCellView view)
+        {
+            View = view;
+        }
 
         public void SetLapNumber(int number)
         {
             View.LapNumber.text = $"{number:D2}";
         }
-        
+
         public void SetProgressTimer(int minute, int second, int millisecond)
         {
             View.Minute.text = $"{minute:D2}";
@@ -24,7 +37,7 @@ namespace ClockApp
 
         public float CellHeight()
         {
-            return ((RectTransform)View.transform).sizeDelta.y;
+            return View.CellTransform.sizeDelta.y;
         }
     }
 }
