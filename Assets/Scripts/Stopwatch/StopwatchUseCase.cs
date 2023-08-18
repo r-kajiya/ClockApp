@@ -142,7 +142,7 @@ namespace ClockApp
             }
         }
 
-        void OnChangedTimerCount(float time)
+        void OnChangedTimerCount(double time)
         {
             TimeSpan timeSpan = _timerCounter.ConvertTimeSpan();
             Presenter.SetProgressTimer(timeSpan.Minutes, timeSpan.Seconds, timeSpan.Milliseconds);

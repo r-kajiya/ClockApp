@@ -54,5 +54,9 @@ namespace ClockApp
         [SerializeField]
         Text _progressSecond;
         public Text ProgressSecond => _progressSecond;
+
+        [SerializeField]
+        AudioSource _alert;
+        public AudioSource Alert => _alert;
     }
 }

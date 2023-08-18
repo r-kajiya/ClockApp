@@ -80,5 +80,15 @@ namespace ClockApp
 
             return new TimeSpan(hour, minute, second);
         }
+
+        public void PlayAlert()
+        {
+            View.Alert.Play();
+        }
+
+        public void StopAlert()
+        {
+            View.Alert.Stop();
+        }
     }
 }
