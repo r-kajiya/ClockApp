@@ -10,10 +10,10 @@ It will also support ios/ipad devices in the feature.
 ### Clock
 You can check the User`s time zone time.
 
+<img src="ReadMeResource/Image001.png" />
+
 ### Timer
 You can set the timer.
-
-<img src="ReadMe_Resource/RMR_001.PNG" width="50%" />
 
 Can Start, Stop, Reset, Pause.
 
