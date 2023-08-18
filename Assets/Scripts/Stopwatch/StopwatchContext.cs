@@ -8,15 +8,15 @@ namespace ClockApp
     {
         [SerializeField]
         StopwatchView _stopwatchView;
-        
+
         [SerializeField]
         StopwatchLapCellView _stopwatchLapCellViewPrefab;
 
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterEntryPoint<StopwatchUseCase>().WithParameter(_stopwatchLapCellViewPrefab);
-            builder.Register<StopwatchPresenter>(Lifetime.Singleton);
-            builder.RegisterComponent(_stopwatchView);
+            builder.Register<IStopwatchPresenter<IStopwatchView>, StopwatchPresenter>(Lifetime.Singleton);
+            builder.RegisterComponent<IStopwatchView>(_stopwatchView);
         }
     }
 }

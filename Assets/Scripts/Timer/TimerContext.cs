@@ -8,12 +8,12 @@ namespace ClockApp
     {
         [SerializeField]
         TimerView _timerView;
-        
+
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterEntryPoint<TimerUseCase>();
-            builder.Register<TimerPresenter>(Lifetime.Singleton);
-            builder.RegisterComponent(_timerView);
+            builder.Register<ITimerPresenter<ITimerView>, TimerPresenter>(Lifetime.Singleton);
+            builder.RegisterComponent<ITimerView>(_timerView);
         }
     }
 }

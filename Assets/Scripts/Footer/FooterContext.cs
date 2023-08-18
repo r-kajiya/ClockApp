@@ -8,12 +8,12 @@ namespace ClockApp
     {
         [SerializeField]
         FooterView _footerView;
-        
+
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterEntryPoint<FooterUseCase>();
-            builder.Register<FooterPresenter>(Lifetime.Singleton);
-            builder.RegisterComponent(_footerView);
+            builder.Register<IFooterPresenter<IFooterView>, FooterPresenter>(Lifetime.Singleton);
+            builder.RegisterComponent<IFooterView>(_footerView);
         }
     }
 }

@@ -6,12 +6,26 @@ using VContainer.Unity;
 
 namespace ClockApp
 {
-    public class FooterUseCase : UseCaseBase<FooterPresenter> ,IStartable, IDisposable
+    public interface IFooterUseCase<out TPresenter, out TView> : IUseCase<TPresenter, TView>
+        where TView : IFooterView
+        where TPresenter : IFooterPresenter<TView>
     {
+        void OnStopwatchTransition();
+        void OnClockTransition();
+        void OnTimerTransition();
+    }
+
+    public class FooterUseCase : IFooterUseCase<IFooterPresenter<IFooterView>, IFooterView>, IStartable, IDisposable
+    {
+        public IFooterPresenter<IFooterView> Presenter { get; }
+
         readonly CompositeDisposable _disposable = new();
 
         [Inject]
-        public FooterUseCase(FooterPresenter presenter) : base(presenter) { }
+        public FooterUseCase(IFooterPresenter<IFooterView> presenter)
+        {
+            Presenter = presenter;
+        }
 
         public void Start()
         {
@@ -23,30 +37,29 @@ namespace ClockApp
         }
 
         public void Dispose()
-        { 
+        {
             _disposable.Dispose();
         }
 
-        void OnStopwatchTransition()
+        public void OnStopwatchTransition()
         {
             Presenter.SetActiveStopwatch(true);
             Presenter.SetActiveClock(false);
             Presenter.SetActiveTimer(false);
         }
-        
-        void OnClockTransition()
+
+        public void OnClockTransition()
         {
             Presenter.SetActiveStopwatch(false);
             Presenter.SetActiveClock(true);
             Presenter.SetActiveTimer(false);
         }
 
-        void OnTimerTransition()
+        public void OnTimerTransition()
         {
             Presenter.SetActiveStopwatch(false);
             Presenter.SetActiveClock(false);
-            Presenter.SetActiveTimer(true);   
+            Presenter.SetActiveTimer(true);
         }
     }
 }
-

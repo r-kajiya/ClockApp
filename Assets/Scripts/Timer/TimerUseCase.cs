@@ -6,15 +6,31 @@ using VContainer.Unity;
 
 namespace ClockApp
 {
-    public class TimerUseCase : UseCaseBase<TimerPresenter> ,ITickable, IStartable, IDisposable
+    public interface ITimerUseCase<out TPresenter, out TView> : IUseCase<TPresenter, TView>
+        where TView : ITimerView
+        where TPresenter : ITimerPresenter<TView>
     {
+        void OnNotice();
+        void OnStart();
+        void OnCancel();
+        void OnPause();
+        void OnResume();
+    }
+
+    public class TimerUseCase : ITimerUseCase<ITimerPresenter<ITimerView>, ITimerView>, ITickable, IStartable, IDisposable
+    {
+        public ITimerPresenter<ITimerView> Presenter { get; }
+
         bool _isStart;
         float _timerCount;
         TimeCountService _timerCounter;
         readonly CompositeDisposable _disposable = new();
 
         [Inject]
-        public TimerUseCase(TimerPresenter presenter) : base(presenter) { }
+        public TimerUseCase(ITimerPresenter<ITimerView> presenter)
+        {
+            Presenter = presenter;
+        }
 
         public void Start()
         {
@@ -38,26 +54,26 @@ namespace ClockApp
                 _timerCounter.TickTack(dt);
             }
         }
-        
+
         public void Dispose()
-        { 
+        {
             _disposable.Dispose();
         }
 
-        void OnNotice()
+        public void OnNotice()
         {
             OnCancel();
             Presenter.PlayAlert();
         }
 
-        void OnStart()
+        public void OnStart()
         {
             TimeSpan settingTimerDateTime = Presenter.SettingTimerTimeSpan();
             if (settingTimerDateTime.TotalSeconds == 0)
             {
                 return;
             }
-            
+
             _timerCount = (float)settingTimerDateTime.TotalSeconds;
             _isStart = true;
             Presenter.SwitchSettingOrProgress(false);
@@ -68,7 +84,7 @@ namespace ClockApp
             Presenter.StopAlert();
         }
 
-        void OnCancel()
+        public void OnCancel()
         {
             _isStart = false;
             Presenter.SwitchSettingOrProgress(true);
@@ -78,7 +94,7 @@ namespace ClockApp
             Presenter.StopAlert();
         }
 
-        void OnPause()
+        public void OnPause()
         {
             _isStart = false;
             Presenter.SetActiveStartButton(false);
@@ -86,7 +102,7 @@ namespace ClockApp
             Presenter.SetActiveResumeButton(true);
         }
 
-        void OnResume()
+        public void OnResume()
         {
             _isStart = true;
             Presenter.SetActiveStartButton(false);
@@ -100,7 +116,7 @@ namespace ClockApp
             {
                 return;
             }
-            
+
             if (time <= 0.0f)
             {
                 OnNotice();
@@ -112,9 +128,8 @@ namespace ClockApp
                 int minute = timeSpan.Minutes;
                 int second = timeSpan.Seconds;
                 float fill = (float)time / _timerCount;
-                Presenter.SetProgressTimer(hour, minute, second, fill);       
+                Presenter.SetProgressTimer(hour, minute, second, fill);
             }
         }
     }
 }
-

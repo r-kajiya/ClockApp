@@ -4,43 +4,64 @@ using VContainer;
 
 namespace ClockApp
 {
-    public class TimerPresenter : PresenterBase<TimerView>
+    public interface ITimerPresenter<out TView> : IPresenter<TView>
+        where TView : ITimerView
     {
+        void RegisterActionOnClickCancelButton(Action onAction, CompositeDisposable disposable);
+
+        void RegisterActionOnClickStartButton(Action onAction, CompositeDisposable disposable);
+
+        void RegisterActionOnClickPauseButton(Action onAction, CompositeDisposable disposable);
+
+        void RegisterActionOnClickResumeButton(Action onAction, CompositeDisposable disposable);
+
+        void SetActiveStartButton(bool enable);
+
+        void SetActivePauseButton(bool enable);
+
+        void SetActiveResumeButton(bool enable);
+
+        void SetProgressTimer(int hour, int minute, int second, float timerFill);
+
+        void SwitchSettingOrProgress(bool switchSetting);
+
+        TimeSpan SettingTimerTimeSpan();
+
+        void PlayAlert();
+
+        void StopAlert();
+    }
+
+    public class TimerPresenter : ITimerPresenter<ITimerView>
+    {
+        public ITimerView View { get; }
+
         [Inject]
-        public TimerPresenter(TimerView view) : base(view) { }
+        public TimerPresenter(ITimerView view)
+        {
+            View = view;
+        }
 
         const int TAP_INTERVAL_MILLISECOND = 100;
-        
+
         public void RegisterActionOnClickCancelButton(Action onAction, CompositeDisposable disposable)
         {
-            View.CancelButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromMilliseconds(TAP_INTERVAL_MILLISECOND)).Subscribe(_=>
-            {
-                onAction?.Invoke();
-            }).AddTo(disposable);
+            View.CancelButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromMilliseconds(TAP_INTERVAL_MILLISECOND)).Subscribe(_ => { onAction?.Invoke(); }).AddTo(disposable);
         }
-        
+
         public void RegisterActionOnClickStartButton(Action onAction, CompositeDisposable disposable)
         {
-            View.StartButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromMilliseconds(TAP_INTERVAL_MILLISECOND)).Subscribe(_=>
-            {
-                onAction?.Invoke();
-            }).AddTo(disposable);
+            View.StartButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromMilliseconds(TAP_INTERVAL_MILLISECOND)).Subscribe(_ => { onAction?.Invoke(); }).AddTo(disposable);
         }
-        
+
         public void RegisterActionOnClickPauseButton(Action onAction, CompositeDisposable disposable)
         {
-            View.PauseButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromMilliseconds(TAP_INTERVAL_MILLISECOND)).Subscribe(_=>
-            {
-                onAction?.Invoke();
-            }).AddTo(disposable);
+            View.PauseButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromMilliseconds(TAP_INTERVAL_MILLISECOND)).Subscribe(_ => { onAction?.Invoke(); }).AddTo(disposable);
         }
-        
+
         public void RegisterActionOnClickResumeButton(Action onAction, CompositeDisposable disposable)
         {
-            View.ResumeButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromMilliseconds(TAP_INTERVAL_MILLISECOND)).Subscribe(_=>
-            {
-                onAction?.Invoke();
-            }).AddTo(disposable);
+            View.ResumeButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromMilliseconds(TAP_INTERVAL_MILLISECOND)).Subscribe(_ => { onAction?.Invoke(); }).AddTo(disposable);
         }
 
         public void SetActiveStartButton(bool enable)
@@ -52,7 +73,7 @@ namespace ClockApp
         {
             View.PauseButton.gameObject.SetActive(enable);
         }
-        
+
         public void SetActiveResumeButton(bool enable)
         {
             View.ResumeButton.gameObject.SetActive(enable);
