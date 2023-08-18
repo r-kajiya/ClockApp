@@ -46,21 +46,26 @@ namespace ClockApp
 
         void OnNotice()
         {
-            // サウンド再生
             OnCancel();
+            Presenter.PlayAlert();
         }
 
         void OnStart()
         {
+            TimeSpan settingTimerDateTime = Presenter.SettingTimerTimeSpan();
+            if (settingTimerDateTime.TotalSeconds == 0)
+            {
+                return;
+            }
+            
+            _timerCount = (float)settingTimerDateTime.TotalSeconds;
             _isStart = true;
             Presenter.SwitchSettingOrProgress(false);
             Presenter.SetActiveStartButton(false);
             Presenter.SetActivePauseButton(true);
             Presenter.SetActiveResumeButton(false);
-            
-            TimeSpan settingTimerDateTime = Presenter.SettingTimerTimeSpan();
-            _timerCount = (float)settingTimerDateTime.TotalSeconds;
             _timerCounter.SetTimer(_timerCount);
+            Presenter.StopAlert();
         }
 
         void OnCancel()
@@ -70,6 +75,7 @@ namespace ClockApp
             Presenter.SetActiveStartButton(true);
             Presenter.SetActivePauseButton(false);
             Presenter.SetActiveResumeButton(false);
+            Presenter.StopAlert();
         }
 
         void OnPause()
@@ -90,6 +96,11 @@ namespace ClockApp
 
         void OnChangedTimerCount(double time)
         {
+            if (_isStart == false)
+            {
+                return;
+            }
+            
             if (time <= 0.0f)
             {
                 OnNotice();
