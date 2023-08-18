@@ -88,7 +88,7 @@ namespace ClockApp
             Presenter.SetActiveResumeButton(false);
         }
 
-        void OnChangedTimerCount(float time)
+        void OnChangedTimerCount(double time)
         {
             if (time <= 0.0f)
             {
@@ -100,7 +100,7 @@ namespace ClockApp
                 int hour = timeSpan.Hours;
                 int minute = timeSpan.Minutes;
                 int second = timeSpan.Seconds;
-                float fill = time / _timerCount;
+                float fill = (float)time / _timerCount;
                 Presenter.SetProgressTimer(hour, minute, second, fill);       
             }
         }
