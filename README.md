@@ -21,10 +21,14 @@ Play Alert when finished.
 
 If you want to stop the alert. please tap the button.
 
+<img src="Resource/Image003.png" />
+
 ### Stopwatch
 You can also use the stopwatch.
 
 Can Start, Stop, Reset, and lap time.
+
+<img src="Resource/Image004.png" />
 
 ## DevEnv
 #### Windows 10/11
