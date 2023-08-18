@@ -13,8 +13,8 @@ namespace ClockApp
 
         public void SetDateTime(DateTime dateTime)
         {
-            View.Hour.text = dateTime.Hour.ToString();
-            View.Minute.text = dateTime.Minute.ToString();
+            View.Hour.text = $"{dateTime.Hour:D2}";
+            View.Minute.text = $"{dateTime.Minute:D2}";
         }
 
         public void SetPlaceName(string placeName)

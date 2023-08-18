@@ -9,7 +9,7 @@ namespace ClockApp
         [Inject]
         public FooterPresenter(FooterView view) : base(view) { }
 
-        const int TAP_INTERVAL_MILLISECOND = 100;
+        const int TAP_INTERVAL_MILLISECOND = 99;
         
         public void RegisterActionOnClickStopwatchTransitionButton(Action onAction, CompositeDisposable disposable)
         {
