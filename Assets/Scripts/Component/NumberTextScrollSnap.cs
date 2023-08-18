@@ -22,6 +22,7 @@ namespace ClockApp
         int _decelerationFrameCount;
         readonly List<float> _numberNormalizedPositionList = new();
         ScrollRect _scroll;
+
         ScrollRect Scroll
         {
             get

@@ -10,7 +10,7 @@ namespace ClockApp
     {
         bool _isStart;
         float _timerCount;
-        ReactiveProperty<float> _timerCounter;
+        TimeCountService _timerCounter;
         readonly CompositeDisposable _disposable = new();
 
         [Inject]
@@ -23,8 +23,8 @@ namespace ClockApp
             Presenter.RegisterActionOnClickStartButton(OnStart, _disposable);
             Presenter.RegisterActionOnClickPauseButton(OnPause, _disposable);
             Presenter.RegisterActionOnClickResumeButton(OnResume, _disposable);
-            _timerCounter = new ReactiveProperty<float>();
-            _timerCounter.Subscribe(OnChangedTimerCount).AddTo(_disposable);
+            _timerCounter = new TimeCountService();
+            _timerCounter.Subscribe(OnChangedTimerCount, _disposable);
             Presenter.SetActiveStartButton(true);
             Presenter.SetActivePauseButton(false);
             Presenter.SetActiveResumeButton(false);
@@ -34,7 +34,8 @@ namespace ClockApp
         {
             if (_isStart)
             {
-                _timerCounter.Value -= Time.deltaTime;
+                float dt = -Time.deltaTime;
+                _timerCounter.TickTack(dt);
             }
         }
         
@@ -56,9 +57,10 @@ namespace ClockApp
             Presenter.SetActiveStartButton(false);
             Presenter.SetActivePauseButton(true);
             Presenter.SetActiveResumeButton(false);
+            
             TimeSpan settingTimerDateTime = Presenter.SettingTimerTimeSpan();
             _timerCount = (float)settingTimerDateTime.TotalSeconds;
-            _timerCounter.Value = _timerCount;
+            _timerCounter.SetTimer(_timerCount);
         }
 
         void OnCancel()
@@ -86,20 +88,19 @@ namespace ClockApp
             Presenter.SetActiveResumeButton(false);
         }
 
-        void OnChangedTimerCount(float timerCounter)
+        void OnChangedTimerCount(float time)
         {
-            if (timerCounter <= 0.0f)
+            if (time <= 0.0f)
             {
                 OnNotice();
             }
             else
             {
-                int timerCounterSecond = Mathf.CeilToInt(timerCounter);
-                TimeSpan timeSpan = new TimeSpan(0, 0, timerCounterSecond);
+                TimeSpan timeSpan = _timerCounter.ConvertTimeSpan();
                 int hour = timeSpan.Hours;
                 int minute = timeSpan.Minutes;
                 int second = timeSpan.Seconds;
-                float fill = timerCounter / _timerCount;
+                float fill = time / _timerCount;
                 Presenter.SetProgressTimer(hour, minute, second, fill);       
             }
         }
