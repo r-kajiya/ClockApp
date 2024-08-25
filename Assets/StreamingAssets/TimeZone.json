@@ -1,0 +1,29 @@
+{
+    "Values": [
+        {
+            "id": 1,
+            "utcDiffHours": 9,
+            "placeName": "東京"
+        },
+        {
+            "id": 2,
+            "utcDiffHours": -6,
+            "placeName": "米国"
+        },
+        {
+            "id": 3,
+            "utcDiffHours": 1,
+            "placeName": "グリーンランド"
+        },
+        {
+            "id": 4,
+            "utcDiffHours": 3,
+            "placeName": "モスクワ"
+        },
+        {
+            "id": 5,
+            "utcDiffHours": -10,
+            "placeName": "ハワイ"
+        }
+    ]
+}
